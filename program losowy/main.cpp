@@ -1,7 +1,8 @@
 #include "graph.h"
 #include <iostream>
+#include <cstdlib>
 
-#define ITER 1000000
+#define ITER 2000000
 typedef vector<int> chromosom;
 
 using namespace std;
@@ -39,7 +40,7 @@ int main()
          }
     }
     
-    cout<<bestScore;
+    cout<<bestScore<<'\n';
     
     
     return 0;    

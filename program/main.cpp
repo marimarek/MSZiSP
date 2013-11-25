@@ -46,5 +46,17 @@ double eval(const Graph &G, const chromosom &ind)
 {
     double ret = 0;
     
+    for(chromosom::const_iterator it = ind.begin() ; it != ind.end() ; ++it)
+    {
+        ret+=G[0][*it];
+
+        for(int i=0 ; i<2 && (it+1) != ind.end() ; ++i, ++it)
+        {
+             ret+=G[*it][*(it+1)];
+        }
+        
+        ret+=G[*it][0];
+    }
+    
     return ret;
 }

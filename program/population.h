@@ -11,7 +11,7 @@ using std::pair;
 using std::istream;
 using std::ostream;
 
-typedef vector< vector<int> > chromosom;
+typedef vector<int> chromosom;
 
 class Population
 {

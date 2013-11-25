@@ -1,4 +1,5 @@
 #include "population.h"
+#include<cstdlib>
 
 using std::swap;
 using std::make_pair;
@@ -26,7 +27,7 @@ Population::Population(Graph &G1, double (*eval1)(const Graph &G, const chromoso
 
 void Population::randomPopulation(int pSize1, int cSize)
 {
-    /*pSize = pSize1;
+    pSize = pSize1;
     pop = vector<chromosom>(pSize, chromosom(cSize));
     
     vector<int> pom(cSize);
@@ -45,7 +46,7 @@ void Population::randomPopulation(int pSize1, int cSize)
              
              swap(pom[index],pom[cSize-j-1]);
         } 
-    }*/
+    }
 }
 
 bool Population::add(chromosom c)
@@ -127,15 +128,15 @@ void Population::nextGeneration(int groupSize,  double mutChance, int reproducti
 
 void Population::mutation(chromosom &v)
 {
-    /*int i1 = rand()%v.size();
+    int i1 = rand()%v.size();
     int i2 = rand()%v.size();
     
-    swap(v[i1], v[i2]);*/
+    swap(v[i1], v[i2]);
 }
 
 void Population::CR(const chromosom &P1, const chromosom &P2)
 {
-    /*int start = rand()%(P1.size()-3);
+    int start = rand()%(P1.size()-3);
     int end = start + 3 + rand()%(P1.size() - start - 3);
     
     chromosom ch1, ch2;
@@ -160,7 +161,7 @@ void Population::CR(const chromosom &P1, const chromosom &P2)
     }
     
     pop.push_back(ch1);
-    pop.push_back(ch2);*/
+    pop.push_back(ch2);
 }
 
 
@@ -184,26 +185,26 @@ chromosom Population::bestSolution()
 istream & operator>>(istream & in, Population & P)
 {
     int pSize, cSize;
-    /*in>>pSize>>cSize;
+    in>>pSize>>cSize;
     
     P.pop = vector<chromosom>(pSize, chromosom(cSize, 0) );
     for(int i=0 ; i<pSize ; ++i)
         for(int j=0 ; j<cSize ; ++j)
-            in>>P.pop[i][j];*/
+            in>>P.pop[i][j];
     
     return in;
 }
 
 ostream & operator<<(ostream & out, const Population & P)
 {
-    /*out<<P.pSize<<'\n';
+    out<<P.pSize<<'\n';
     
     for(int i=0 ; i<P.pSize ; ++i)
     {
         for(int j=0 ; j<P.pop[i].size() ; ++j)
             out<<P.pop[i][j]<<' ';
         out<<'\n';
-    }*/
+    }
     
     return out;
 }
