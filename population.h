@@ -12,6 +12,7 @@ using std::istream;
 using std::ostream;
 
 typedef vector< vector<int> > chromosom;
+typedef double (*evalFunction_ptr)(const Graph &, const chromosom &, double, double);
 
 class Population
 {
@@ -19,7 +20,9 @@ class Population
         int pSize;
         
         Graph &G;
-        double (*eval)(const Graph &G, const chromosom &ind); 
+        evalFunction_ptr eval; 
+        double maxPathLength;
+        double penalty;
         
         void mutation(chromosom &v);
         void CR(const chromosom &P1, const chromosom &P2);
@@ -27,11 +30,11 @@ class Population
         
         pair<chromosom, chromosom> chooseParents(int groupSize);
     public:
-        Population(Graph &G1, double (*eval1)(const Graph &G, const chromosom &ind));
-        Population(Graph &G1, double (*eval1)(const Graph &G, const chromosom &ind), int pSize1, int cSize);
-        Population(Graph &G1, double (*eval1)(const Graph &G, const chromosom &ind), const vector<chromosom > &);
+        Population(Graph &G1, evalFunction_ptr eval1, double maxPathLength1, double penalty1 = 10);
+        Population(Graph &G1, evalFunction_ptr eval1, int pSize1, double maxPathLength1, double penalty1 = 10);
+        Population(Graph &G1, evalFunction_ptr eva1l, const vector<chromosom > & pop, double maxPathLength1, double penalty1 = 10);
         
-        void randomPopulation(int pSize, int cSize);
+        void randomPopulation(int pSize);
         
         bool add(chromosom);
         

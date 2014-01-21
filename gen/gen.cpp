@@ -28,6 +28,10 @@ int main()
            double dy=points[a].second-points[b].second;
            cout<<a<<' '<<b<<' '<<sqrt(dx*dx + dy*dy)<<'\n';
         }
-
+     
+     double avergaDistanceX = w/(n+2.0);
+     double avergaDistanceY = h/(n+2.0);
+     double averageDistance = sqrt(avergaDistanceX*avergaDistanceX + avergaDistanceY*avergaDistanceY);
+     cout<<averageDistance*(n/5.0)<<'\n';
      return 0;    
 }
