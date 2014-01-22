@@ -47,27 +47,20 @@ void Population::randomPopulation(int pSize1)
         //shuffle city order
         std::random_shuffle ( pom.begin(), pom.end() );
         
-        //start and end of creating new paths
-        vector<int>::const_iterator it_start = pom.begin(), it_end = pom.begin() + 1;
-        double pathLength = G[0][*it_start];
-        for(;it_end != pom.end();  ++it_end)
-        {     
-              //end path with chance (pathLengtrh/maxAllowedPathLength)^(2.5)
-             if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*(it_end-1)][0])/maxPathLength, 2.5) )
+        pop[i].push_back(0);
+        chromosom::const_iterator it = individual.begin();
+        double path_length;
+        for( it; it != individual.end(); ++it)
+        {
+             path_length += G[*(pop.end()-1)][*it];
+             pop[i].push_back(*it);
+             if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*it][0])/maxPathLength, 2.5)
              {
-                  //add salesman path
-                  pop[i].push_back(vector<int>(it_start, it_end));
-                  it_start = it_end;     
-                  pathLength = G[0][*it_start];
-             }
-             else
-             {
-                 pathLength += G[*(it_end-1)][*it_end];        
+                 pop[i].push_back(0);
+                 pathLength = 0;
              }
         }
-        
-        //add salesman path
-        pop[i].push_back(vector<int>(it_start, it_end));
+        pop[i].push_back(0);
     }
 }
 
