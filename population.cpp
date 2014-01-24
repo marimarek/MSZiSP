@@ -16,7 +16,7 @@ Population::Population(Graph &G1, evalFunction_ptr eval1, int pSize1, double max
    : G(G1), eval(eval1), maxPathLength(maxPathLength1), penalty(penalty1)
 {
     srand(time(NULL));  
-    randomPopulation(pSize1);
+    randomPopulation2(pSize1);
 }
 
 Population::Population(Graph &G1, evalFunction_ptr eval1, const vector<chromosom > &v, double maxPathLength1, double penalty1)
@@ -48,19 +48,89 @@ void Population::randomPopulation(int pSize1)
         std::random_shuffle ( pom.begin(), pom.end() );
         
         pop[i].push_back(0);
-        chromosom::const_iterator it = individual.begin();
-        double path_length;
-        for( it; it != individual.end(); ++it)
+        vector<int>::const_iterator it = pom.begin();
+        double pathLength;
+        for( it; it != pom.end(); ++it)
         {
-             path_length += G[*(pop.end()-1)][*it];
+             pathLength += G[*(pop[i].end()-1)][*it];
              pop[i].push_back(*it);
-             if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*it][0])/maxPathLength, 2.5)
+             if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*it][0])/maxPathLength, 2.5))
              {
                  pop[i].push_back(0);
                  pathLength = 0;
              }
         }
+        if(*(pop[i].end()-1) != 0)
+            pop[i].push_back(0);
+    }
+}
+
+void Population::randomPopulation1(int pSize1)
+{
+    
+    pSize = pSize1;
+    pop = vector<chromosom>(pSize);
+    
+    if( G.size() < 2)
+        return;
+    
+    //tmp helper vector with city order
+    vector<int> pom(G.size() - 1);
+
+    for(int i=0 ; i<pSize ; ++i)    
+    {
+        for(int j=1 ; j< G.size() ; ++j)
+            pom[j-1]=j;
+        //shuffle city order
+        std::random_shuffle ( pom.begin(), pom.end() );
+        
         pop[i].push_back(0);
+        vector<int>::const_iterator it = pom.begin();
+        for( it; it != pom.end(); ++it)
+        {
+             pop[i].push_back(*it);
+             if(1.0*rand()/RAND_MAX <= 0.8)
+                 pop[i].push_back(0);
+        }
+        pop[i].push_back(0);
+    }
+}
+
+
+void Population::randomPopulation2(int pSize1)
+{
+    
+    pSize = pSize1;
+    pop = vector<chromosom>(pSize);
+    
+    if( G.size() < 2)
+        return;
+    
+    //tmp helper vector with city order
+    vector<int> pom(G.size() - 1);
+
+    for(int i=0 ; i<pSize ; ++i)    
+    {
+        for(int j=1 ; j< G.size() ; ++j)
+            pom[j-1]=j;
+        //shuffle city order
+        std::random_shuffle ( pom.begin(), pom.end() );
+        
+        double pathLength = G[0][pom[0]];
+        for(int j=1 ; j< pom.size() ; ++j)
+            pathLength += G[pom[j-1]][pom[j]];
+        pathLength += G[*(pom.end()-1)][0];    
+        
+        pop[i].push_back(0);
+        vector<int>::const_iterator it = pom.begin();
+        for( it; it != pom.end(); ++it)
+        {
+             pop[i].push_back(*it);
+             if(1.0*rand()/RAND_MAX < 1.0/(pathLength/maxPathLength))
+                 pop[i].push_back(0);
+        }
+        if(*(pop[i].end()-1) != 0)
+            pop[i].push_back(0);
     }
 }
 
@@ -144,62 +214,48 @@ void Population::nextGeneration(int groupSize,  double mutChance, int reproducti
 
 void Population::mutation(chromosom &v)
 {
-    int x1 = rand()%v.size();
-    int y1 = rand()%v[x1].size();
-    int x2 = rand()%v.size();
-    int y2 = rand()%v[x2].size();
+    int i1 = rand()%(v.size()-2)+1;
+    int i2 = rand()%(v.size()-2)+1;
     
-    swap(v[x1][y1], v[x2][y2]);
+    swap(v[i1], v[i2]);
+    if(v[i1] == 0 &&(v[i1+1] == 0 || v[i1-1] == 0))
+    {
+        v.erase(v.begin()+i1);
+        if(i2 >= i1)
+            --i2;
+    }
+    if(v[i2] == 0 &&(v[i2+1] == 0 || v[i2-1] == 0))
+       v.erase(v.begin()+i2);
 }
 
 void Population::CR(const chromosom &P1, const chromosom &P2)
-{     
-    int start = rand()%P1.size();
-    int end = start + rand()%(P1.size() - start);
+{
+    int start = rand()%(P1.size()-3);
+    int end = start + 3 + rand()%(P1.size() - start - 3);
     
-    chromosom ch;
-    vector<bool> used(G.size(), false);
+    chromosom cildren;
+    vector<bool> used(P1.size()+1, false);
+    
+    if(P1[start] != 0)
+        cildren.push_back(0);
     
     for(int i=start ; i<end ; ++i)
     {
-        ch.push_back(P1[i]);
-        for(int j = 0; j < P1[i].size(); ++j)
-           used[P1[i][j]] = true;
+        cildren.push_back(P1[i]);
+        if(P1[i] != 0)
+            used[P1[i]] = true;
     }
     
-    vector<int> pom;
-    for(int i = 0; i < P2.size(); ++i)
-        for(int j = 0; j < P2[i].size(); ++j)
-            if( !used[P2[i][j]] )
-                 pom.push_back(P2[i][j]);
-    
-    if(pom.size() > 0)
-    {     
-        vector<int>::const_iterator it_start = pom.begin(), it_end = pom.begin() + 1;
-        double pathLength = G[0][*it_start];
-        for(;it_end != pom.end();  ++it_end)
-        {     
-              //end path with chance (pathLengtrh/maxAllowedPathLength)^(2.5)
-             if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*(it_end-1)][0])/maxPathLength, 2.5) )
-             {
-                  //add salesman path
-                  ch.push_back(vector<int>(it_start, it_end));
-                  it_start = it_end;     
-                  pathLength = G[0][*it_start];
-             }
-             else
-             {
-                 pathLength += G[*(it_end-1)][*it_end];        
-             }
-        }
-        
-        //add salesman path
-        ch.push_back(vector<int>(it_start, it_end));
+    for(int i=0 ; i<P2.size() ; ++i)
+    {
+        if(!used[P2[i]] && !(P2[i] == 0 && *(cildren.end()-1) == 0) && !(P2[i] == 0 && i >= start && i < end))
+            cildren.push_back(P2[i]);
     }
-    
-    pop.push_back(ch);
+    if(*(cildren.end()-1) != 0)
+        cildren.push_back(0);  
+                           
+    pop.push_back(cildren);
 }
-
 
 chromosom Population::bestSolution()
 {
@@ -221,42 +277,31 @@ chromosom Population::bestSolution()
 
 istream & operator>>(istream & in, Population & P)
 {
-    in>>P.pSize;
-    
-    P.pop = vector<chromosom>(P.pSize);
-    for(int i=0 ; i<P.pSize ; ++i)
+    int pSize, cSize;
+    in>>pSize;
+
+    P.pop = vector<chromosom>(pSize );
+    for(int i=0 ; i<pSize ; ++i)
     {
-        int numOfPaths;
-        in>>numOfPaths;
-        P.pop[i] = chromosom(numOfPaths);
-        for(int j=0 ; j<numOfPaths ; ++j)
-        {
-            int numOfCityInPath;
-            in>>numOfCityInPath;
-            P.pop[i][j] = vector<int>(numOfCityInPath);   
-            for(int k=0 ; k<numOfCityInPath ; ++k)
-                in>>P.pop[i][j][k];
-        }
+        in>>cSize;
+        P.pop[i] = chromosom(cSize);
+        for(int j=0 ; j<cSize ; ++j)
+            in>>P.pop[i][j];
     }
-    
+
     return in;
 }
 
 ostream & operator<<(ostream & out, const Population & P)
 {
     out<<P.pSize<<'\n';
-    
+
     for(int i=0 ; i<P.pSize ; ++i)
     {
-        out<<P.pop[i].size()<<'\n';
         for(int j=0 ; j<P.pop[i].size() ; ++j)
-        {
-            out<<P.pop[i][j].size()<<'\n';
-            for(int k=0 ; k<P.pop[i][j].size() ; ++k)
-                out<<P.pop[i][j][k]<<' ';
-            out<<'\n';
-        } 
+            out<<P.pop[i][j]<<' ';
+        out<<'\n';
     }
-    
+
     return out;
 }

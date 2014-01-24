@@ -8,7 +8,7 @@
 #define POP_SIZE 100
 #define ITER 10000
 #define SIZE_GROUP 10
-#define MUT_CHANCE 0.1
+#define MUT_CHANCE 0.05
 #define REPR 20
 
 #define PRINT_STEP 100
@@ -48,21 +48,18 @@ double eval(const Graph &G, const chromosom &individual, double maxPathLength, d
 {
     double ret = 0;
     
-    //iterate over paths
-    chromosom::const_iterator ch_it;
-    for( ch_it = individual.begin(); ch_it != individual.end(); ++ch_it)
+    chromosom::const_iterator it = individual.begin() + 1;
+    double pathLength = 0;
+    for( ; it != individual.end(); ++it)
     {
-         //iterate over city in path
-         vector<int>::const_iterator path_it = (*ch_it).begin();
-         double pathLength = G[0][*path_it];
-    
-        for(; (path_it+1) != (*ch_it).end() ; ++path_it)
-             ret+=G[*path_it][*(path_it+1)];
-        pathLength+=G[*path_it][0];
-         
-         ret += pathLength;
-         if(pathLength > maxPathLength)
-             ret += (pathLength - maxPathLength)*(penalty - 1);
+         pathLength += G[*(it-1)][*it];
+         if(*it == 0)
+         {
+             ret += pathLength;
+             if(pathLength > maxPathLength)
+                 ret += (pathLength - maxPathLength) *(penalty -1);
+             pathLength = 0;
+         }
     }
     
     return ret;

@@ -32,6 +32,9 @@ int main()
      double avergaDistanceX = w/(n+2.0);
      double avergaDistanceY = h/(n+2.0);
      double averageDistance = sqrt(avergaDistanceX*avergaDistanceX + avergaDistanceY*avergaDistanceY);
-     cout<<averageDistance*(n/5.0)<<'\n';
+     //solution should have about 5 salesman
+     //cout<<averageDistance*(n/5.0)<<'\n';
+     //paths in solkution should have length about 5
+     cout<<averageDistance*5.0<<'\n';
      return 0;    
 }

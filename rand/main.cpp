@@ -3,13 +3,14 @@
 #include <cmath>
 
 #define ITER 1000000
-typedef vector< vector<int> > chromosom;
+typedef vector<int> chromosom;
 
 using namespace std;
 
 double eval(const Graph &G, const chromosom &individual, double maxPathLength, double penalty = 10);
 chromosom randChromosom(const Graph &G, double maxPathLength);
-
+chromosom randChromosom1(const Graph &G, double maxPathLength);
+chromosom randChromosom2(const Graph &G, double maxPathLength);
 
 int main()
 {   
@@ -23,7 +24,7 @@ int main()
     cin>>G;
     cin>>maxPathLength;
     
-    chromosom bestCh = randChromosom(G, maxPathLength);
+    chromosom bestCh = randChromosom2(G, maxPathLength);
     double bestScore = eval(G, bestCh, maxPathLength);
     
     
@@ -32,7 +33,7 @@ int main()
     
     for(int i=0 ; i<ITER ; ++i)
     {
-         pom = randChromosom(G, maxPathLength);
+         pom = randChromosom2(G, maxPathLength);
          pom1 = eval(G, pom, maxPathLength);
          
          if(pom1 < bestScore)
@@ -53,21 +54,18 @@ double eval(const Graph &G, const chromosom &individual, double maxPathLength, d
 {
     double ret = 0;
     
-    //iterate over paths
-    chromosom::const_iterator ch_it;
-    for( ch_it = individual.begin(); ch_it != individual.end(); ++ch_it)
+    chromosom::const_iterator it = individual.begin() + 1;
+    double pathLength = 0;
+    for( ; it != individual.end(); ++it)
     {
-         //iterate over city in path
-         vector<int>::const_iterator path_it = (*ch_it).begin();
-         double pathLength = G[0][*path_it];
-    
-        for(; (path_it+1) != (*ch_it).end() ; ++path_it)
-             ret+=G[*path_it][*(path_it+1)];
-        pathLength+=G[*path_it][0];
-         
-         ret += pathLength;
-         if(pathLength > maxPathLength)
-             ret += (pathLength - maxPathLength)*(penalty - 1);
+         pathLength += G[*(it-1)][*it];
+         if(*it == 0)
+         {
+             ret += pathLength;
+             if(pathLength > maxPathLength)
+                 ret += (pathLength - maxPathLength) *(penalty -1);
+             pathLength = 0;
+         }
     }
     
     return ret;
@@ -77,33 +75,82 @@ chromosom randChromosom(const Graph &G, double maxPathLength)
 {
     chromosom ret;
           
-    vector<int> pom(G.size() - 1);
+    vector<int> pom(G.size()-1);
     for(int j=1 ; j< G.size() ; ++j)
         pom[j-1]=j;
     //shuffle city order
     std::random_shuffle ( pom.begin(), pom.end() );
     
-    //start and end of creating new paths
-    vector<int>::const_iterator it_start = pom.begin(), it_end = pom.begin() + 1;
-    double pathLength = G[0][*it_start];
-    for(;it_end != pom.end();  ++it_end)
-    {     
-          //end path with chance (pathLengtrh/maxAllowedPathLength)^(2.5)
-         if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*(it_end-1)][0])/maxPathLength, 2.5) )
+    ret.push_back(0);
+    vector<int>::const_iterator it = pom.begin();
+    double pathLength;
+    for( it; it != pom.end(); ++it)
+    {
+         pathLength += G[*(ret.end()-1)][*it];
+         ret.push_back(*it);
+         if(1.0*rand()/RAND_MAX <= pow((pathLength + G[*it][0])/maxPathLength, 2.5))
          {
-              //add salesman path
-              ret.push_back(vector<int>(it_start, it_end));
-              it_start = it_end;     
-              pathLength = G[0][*it_start];
-         }
-         else
-         {
-             pathLength += G[*(it_end-1)][*it_end];        
+             ret.push_back(0);
+             pathLength = 0;
          }
     }
-    
-    //add salesman path
-    ret.push_back(vector<int>(it_start, it_end)); 
+    ret.push_back(0);
     
     return ret;
 }
+
+
+chromosom randChromosom1(const Graph &G, double maxPathLength)
+{
+    chromosom ret;
+        
+    vector<int> pom(G.size()-1);
+    for(int j=1 ; j< G.size() ; ++j)
+        pom[j-1]=j;
+    //shuffle city order
+    std::random_shuffle ( pom.begin(), pom.end() );
+    
+    ret.push_back(0);
+    vector<int>::const_iterator it = pom.begin();
+    for( it; it != pom.end(); ++it)
+    {
+         ret.push_back(*it);
+         if(1.0*rand()/RAND_MAX <= 0.9)
+             ret.push_back(0);
+    }
+    if(*(ret.end()-1) != 0)
+        ret.push_back(0);
+    
+    return ret;
+}
+
+
+chromosom randChromosom2(const Graph &G, double maxPathLength)
+{
+    chromosom ret;
+        
+    vector<int> pom(G.size()-1);
+    for(int j=1 ; j< G.size() ; ++j)
+        pom[j-1]=j;
+    //shuffle city order
+    std::random_shuffle ( pom.begin(), pom.end() );
+    
+    double pathLength = G[0][pom[0]];
+    for(int j=1 ; j< pom.size() ; ++j)
+        pathLength += G[pom[j-1]][pom[j]];
+    pathLength += G[*(pom.end()-1)][0];    
+    
+    ret.push_back(0);
+    vector<int>::const_iterator it = pom.begin();
+    for( it; it != pom.end(); ++it)
+    {
+         ret.push_back(*it);
+         if(1.0*rand()/RAND_MAX < 1.0/(pathLength/maxPathLength))
+             ret.push_back(0);
+    }
+    if(*(ret.end()-1) != 0)
+        ret.push_back(0);
+    
+    return ret;
+}
+

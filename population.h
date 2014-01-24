@@ -35,6 +35,8 @@ class Population
         Population(Graph &G1, evalFunction_ptr eva1l, const vector<chromosom > & pop, double maxPathLength1, double penalty1 = 10);
         
         void randomPopulation(int pSize);
+        void randomPopulation1(int pSize1);
+        void randomPopulation2(int pSize1);
         
         bool add(chromosom);
         
